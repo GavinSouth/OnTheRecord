@@ -20,7 +20,7 @@ iOS (`ios/`):
 - Swift / SwiftUI on the same HTTP API as the web app; the primary client. Not started (Phase 3, before web).
 
 ## Layout
-- `backend/` — Python package (`src/ontherecord/`), tests (`tests/`, need Postgres running), Alembic (`migrations/`), `compose.yaml` (local Postgres), `.env.example`, `pyproject.toml` (tool config)
+- `backend/` — Python package (`src/ontherecord/`), tests (`tests/`, need Postgres running), Alembic (`migrations/`), `compose.yaml` (local Postgres), `Dockerfile` + `railway.json` (deploy), `scripts/`, `.env.example`, `pyproject.toml` (tool config)
 - `web/` — React app (`src/`)
 - `ios/` — SwiftUI app (placeholder)
 - `docs/` — `HISTORY_P<phase>.md` context log per phase; `ARCHITECTURE.md` (decisions + design links); `HOSTING.md` (deploy + database roles plan); `python_research.md` (user's tooling notes)
@@ -35,6 +35,7 @@ Run from `backend/`:
 - All checks: `uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run pytest`
 - Auto-fix: `uv run ruff check --fix . && uv run ruff format .`
 - Hooks: `uv run pre-commit install` (once), `uv run pre-commit run --all-files`
+- DB roles: `uv run ontherecord-db-setup` (admin URL via `OTR_ADMIN_DATABASE_URL` or prompt); image: `docker build -t ontherecord-api .`; prod copy: `scripts/restore-prod-copy.sh`
 - End of feature: `/finish-feature`
 
 Run from `web/`:

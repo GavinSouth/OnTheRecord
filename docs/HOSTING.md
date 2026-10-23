@@ -1,6 +1,6 @@
 # Hosting & database plan
 
-Notes and plan for **F2.6 Deploy** (and beyond), from the Oct 2026 discussions logged in `docs/HISTORY_P2.md`. Nothing here is set up yet. Prices are from third-party sources as of 2026-10-23; re-check them before signing up.
+Notes and plan for **F2.6 Deploy** (and beyond), from the Oct 2026 discussions logged in `docs/HISTORY_P2.md`. The code side of F2.6 is built and rehearsed locally (see the runbook); the Railway account steps aren't done yet. Prices are from third-party sources as of 2026-10-23; re-check them before signing up.
 
 ## Dev vs production
 | | Development (today) | Production (F2.6) |
@@ -71,7 +71,7 @@ Why three app-side roles (least privilege):
 - **`otr_owner`** is used only by `alembic upgrade head` during a deploy.
 - **`otr_readonly`** lets DBeaver, Python notebooks and so on browse real data with zero chance of changing it.
 
-Role setup (run once as `postgres` in F2.6; passwords generated, stored only in Railway variables and your password manager):
+Role setup: **`uv run ontherecord-db-setup`** (`backend/src/ontherecord/db_setup.py`) does everything below except the personal login and `sandbox`, idempotently, generating the passwords. The SQL is kept here to show what it does:
 
 ```sql
 CREATE ROLE otr_owner    LOGIN PASSWORD '<generated>';
@@ -98,10 +98,10 @@ CREATE ROLE <your-name> LOGIN PASSWORD '<generated>';   -- personal login for ex
 CREATE DATABASE sandbox OWNER <your-name>;                 -- free-for-all playground
 ```
 
-Code changes this needs (F2.6):
+Code (built in F2.6):
 - **Two URLs:** `OTR_DATABASE_URL` (as `otr_app`) for the API, and `OTR_MIGRATIONS_DATABASE_URL` (as `otr_owner`) read by `migrations/env.py`, falling back to the first.
-- **Deploy step:** `alembic upgrade head` with the owner URL, then start the API.
-- **Local parity:** a Compose init script creating the same roles, so permission bugs show up on the Mac first.
+- **Deploy step:** `backend/railway.json` runs `alembic upgrade head` as a pre-deploy command (with the owner URL), then starts the image from `backend/Dockerfile`.
+- **Local parity:** instead of a Compose init script (which only runs on an empty volume), the test suite recreates `ontherecord_test` with the same setup function and runs every test as `otr_app`, locally and in CI. Your dev database can be switched over too (runbook step 0).
 
 ## Your data: data-engineering practice
 Yes, it's a normal Postgres you fully own. Anything that speaks Postgres can connect:
@@ -119,15 +119,20 @@ Yes, it's a normal Postgres you fully own. Anything that speaks Postgres can con
 4. **Connect over TLS** with a strong password. Prefer Railway's private networking or a temporary public TCP proxy over leaving the database permanently exposed.
 5. **Remember it's sensitive:** exports and notebooks with real data stay on your machine, out of git and out of public services.
 
-## Plan
-**F2.6 Deploy** (ROADMAP):
-1. Verify the Railway checklist above (PG18, backups + restore test, TLS, encryption at rest). If it fails → fallback.
-2. Create the `ontherecord` project: Postgres 18 service (volume at `/var/lib/postgresql`) + API service from `backend/`.
-3. Run the role/database SQL above. Store the passwords in Railway variables + your password manager.
-4. Code: split app vs migration URLs; deploy runs migrations as `otr_owner`; Compose init script for local role parity.
-5. Secrets: `OTR_ENV=prod`, `OTR_DATABASE_URL`, `OTR_MIGRATIONS_DATABASE_URL` `OTR_JWT_SECRET` (a fresh one, never the dev value), `OTR_APPLE_CLIENT_IDS` (the iOS bundle id, from F3.1). The app refuses to start in prod without the last two.
-6. HTTPS URL for the iOS app; `GET /api/v1/health` as the host's health check.
-7. Backups: confirm the schedule, do one test restore into `sandbox`, and write the restore steps into this file.
-8. Data access: connect DBeaver (or similar) as `otr_readonly`; write a `pg_dump` → local restore script (`backend/scripts/`).
+## F2.6 runbook
+Done in code (rehearsed on 2026-10-23 against a throwaway Postgres 18 container: role setup, migrations as `otr_owner`, the image serving as `otr_app` as a non-root user, health 200, dev route 404 in prod, prod → local copy):
+- [x] Split app vs migration URLs; `ontherecord-db-setup`; `Dockerfile` + `.dockerignore`; `railway.json` (pre-deploy migrations, health check, restart on failure); `scripts/restore-prod-copy.sh`; tests on the prod roles.
+
+Your steps (need the Railway account):
+0. *(Optional, local parity for dev)* The dev database `ontherecord` is owned by the Compose superuser, so setup refuses it. Since dev data is throwaway: `docker compose exec db dropdb -U ontherecord --force ontherecord`, then `OTR_ADMIN_DATABASE_URL=postgresql://ontherecord:<pw>@localhost:5432/postgres uv run ontherecord-db-setup`, put the printed `otr_app` / `otr_owner` URLs in `backend/.env` as `OTR_DATABASE_URL` / `OTR_MIGRATIONS_DATABASE_URL`, and `uv run alembic upgrade head`.
+1. **Pick the iOS bundle id now** (e.g. `com.<you>.ontherecord`). Prod refuses to start without `OTR_APPLE_CLIENT_IDS`, and the id is yours to choose before F3.1.
+2. **Railway:** sign up, Hobby plan, new project `ontherecord`. Add Postgres and check `SELECT version();` says 18 (otherwise use a PG18 template; volume at `/var/lib/postgresql`). Turn on **backups** for its volume and note the schedule. Check that the public TCP proxy uses TLS (`sslmode=require` works) and what Railway states about encryption at rest. Any failure → a fallback above.
+3. **Roles:** enable the Postgres TCP proxy, copy its public admin URL, and run from `backend/`: `uv run ontherecord-db-setup` (paste the URL at the hidden prompt). Save the three printed URLs in your password manager.
+4. **API service:** New → GitHub repo. Settings: root directory `/backend`, config file `/backend/railway.json` (the config path doesn't follow the root directory). Variables: `OTR_ENV=prod`, `OTR_JWT_SECRET` (fresh: `python -c "import secrets; print(secrets.token_urlsafe(48))"`), `OTR_APPLE_CLIENT_IDS=["<bundle id>"]`, `OTR_DATABASE_URL` (the `otr_app` URL) and `OTR_MIGRATIONS_DATABASE_URL` (the `otr_owner` URL), both with the host swapped for the private one (`postgres.railway.internal:5432`), so the API never leaves Railway's network.
+5. **HTTPS:** Networking → Generate Domain. `curl https://<domain>/api/v1/health` → `{"status":"ok","database":"ok"}`; `/api/v1/auth/dev` → 404.
+6. **Backups + restore:** run `OTR_SOURCE_DATABASE_URL='<otr_readonly URL>?sslmode=require' scripts/restore-prod-copy.sh` (the tested logical restore), and find out how a Railway volume backup restores (in place or to a new volume) before you need it. Write the steps here.
+7. **Data access:** connect DBeaver/TablePlus as `otr_readonly` over the TCP proxy with `sslmode=require`; create your personal login + `sandbox` (SQL above). Turn the TCP proxy off when you're not using it.
+
+Then tell me the results and I'll record them, tick F2.6, and commit.
 
 **Later (Phase 5 backlog):** an `analytics` schema with derived tables/views, a scheduled export or dbt project for practice, and a `side-projects` Railway project with a shared Postgres for small apps.

@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     env: Literal["dev", "test", "prod"] = "dev"
     # SQLAlchemy URL, e.g. postgresql+psycopg://user:password@localhost:5432/ontherecord
     database_url: str
+    # Alembic connects with this instead when set: in prod the API runs as `otr_app`
+    # (rows only) and migrations as `otr_owner` (owns the tables). See docs/HOSTING.md.
+    migrations_database_url: str | None = None
 
     # Signs access tokens (HS256). Generate one with:
     #   python -c "import secrets; print(secrets.token_urlsafe(48))"

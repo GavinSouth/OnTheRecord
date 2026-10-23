@@ -174,16 +174,30 @@ Implemented in `services/apple.py`, `services/auth.py` and `api/deps.py`. Every 
 - **Dev sign-in**: `POST /auth/dev` returns tokens for the local dev user. The router is only mounted when `OTR_ENV` isn't `prod`, so it doesn't exist (or appear in the spec) in production. `/docs` has an Authorize button for the access token.
 - **Sign-ups are open** to anyone who can get an identity token for our app ids (only our own app can). Every row is scoped to its user. An allow-list can be added before a public launch.
 
+## Deploy rules (F2.6)
+Plan and the manual steps: [HOSTING.md](HOSTING.md). Code: `db_setup.py`, `Dockerfile`, `railway.json`, `scripts/restore-prod-copy.sh`.
+- **Least-privilege roles**: `otr_owner` owns the database and every table (only migrations connect as it), `otr_app` is the API (`SELECT/INSERT/UPDATE/DELETE` on rows, no DDL, no `TRUNCATE`), `otr_readonly` is for SQL tools (`SELECT`). `PUBLIC` can't connect. Default privileges give `otr_app`/`otr_readonly` access to tables that future migrations create.
+- **One setup command** (`uv run ontherecord-db-setup`, run as an admin): creates the roles and database, re-applies grants, idempotent. New roles get generated passwords, hashed client-side (SCRAM) so plain text never reaches server logs, printed once. The admin URL comes from the environment or a hidden prompt, never argv. It refuses a database owned by someone else instead of silently re-owning it.
+- **Two URLs**: `OTR_DATABASE_URL` (as `otr_app`) for the API; `OTR_MIGRATIONS_DATABASE_URL` (as `otr_owner`) read by `migrations/env.py`, falling back to the first (so a single-role local `.env` still works).
+- **Tests run with the prod roles**: the test database is recreated per run by the same setup function, migrated as `otr_owner`, and every test connects as `otr_app` (the superuser test login switches with `SET ROLE` via the connection's `options`, so no role passwords are needed). A missing grant fails locally and in CI before it fails in prod.
+- **Image**: two-stage `Dockerfile` (uv installs locked, non-dev deps into a venv; the runtime stage gets only the venv + Alembic files), runs as a non-root user, listens on `$PORT`. Host-agnostic, so a fallback host can build the same image.
+- **Deploy order** (`railway.json`): build → pre-deploy `alembic upgrade head` (a failed migration stops the deploy; the old version keeps serving) → start → health check on `/api/v1/health` (503 if the database is unreachable) before traffic switches.
+- **Migrations must be backward-compatible with the previous release**, because the old version serves briefly against the new schema (add columns as nullable, drop in a later release).
+- **Prod copy**: `scripts/restore-prod-copy.sh` streams `pg_dump | pg_restore` as `otr_readonly` inside the local Postgres 18 container (no dump file on disk) into a `*copy*` database.
+
 ## Backend layout (F2.1)
 ```
 backend/
   compose.yaml          local Postgres 18 (Docker); values from backend/.env
+  Dockerfile, railway.json   production image + Railway deploy config (F2.6)
+  scripts/              restore-prod-copy.sh (prod → local copy)
   .env.example          OTR_* settings + POSTGRES_* for compose
   alembic.ini, migrations/   Alembic; sequential revision ids (0001, 0002, …)
   src/ontherecord/
     main.py             create_app(settings) factory; `run()` = dev server
     config.py           Settings (pydantic-settings, OTR_ env prefix)
     db.py               engine, session factory, get_session dependency
+    db_setup.py         `ontherecord-db-setup`: least-privilege roles + database (F2.6)
     models/             SQLAlchemy models; base.py = Base, UUIDPrimaryKey, Timestamps
     schemas/            Pydantic request/response models
     services/           business rules (routes call these)
@@ -196,7 +210,7 @@ Conventions set in F2.1:
 - **Constraint names** follow a naming convention (`pk_users`, `uq_users_apple_sub`, `fk_<table>_<col>_<ref>`) so later migrations can alter them reliably.
 - **Ids** default to `uuidv7()` in the database (D6), so rows inserted by any path get one.
 - **Auth**: `CurrentUser` resolves the bearer access token (F2.1 shipped a dev stub; replaced in F2.5, see Auth rules). Tests sign in with real tokens.
-- **Tests**: the session-scoped fixture runs `alembic downgrade base` + `upgrade head`, so every migration's up and down path runs on every test run. Each test uses a SAVEPOINT-joined session in an outer transaction that is rolled back.
+- **Tests**: the session-scoped fixture recreates the test database with the prod roles (F2.6) and runs `alembic upgrade head`, `downgrade base`, `upgrade head` as `otr_owner`, so every migration's up and down path runs on every test run. Each test uses a SAVEPOINT-joined session in an outer transaction that is rolled back.
 
 ## Later (not in v1)
 Obsidian sync and the notes agent, offline sync, reminders and notifications, recurring todos, tags, numeric and "N× per week" habits, sharing, public sign-up. See ROADMAP Phase 5.

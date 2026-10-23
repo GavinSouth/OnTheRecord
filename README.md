@@ -9,7 +9,9 @@ A personal life-management app: a **habit tracker** with a GitHub-style heatmap,
 - **F2.4 notes API**: Markdown notes (CRUD), newest first with cursor pagination, and Postgres full-text search (stemming, phrases, `or`, `-exclude`). Rules: [ARCHITECTURE › Note rules](docs/ARCHITECTURE.md#note-rules-f24).
 - **F2.5 auth**: Sign in with Apple (identity token verified against Apple's keys), our own 15-minute access tokens + rotating, hashed refresh tokens with reuse detection, logout, `PATCH /api/v1/me`. Every other route needs `Authorization: Bearer …`. Locally, `POST /api/v1/auth/dev` gives you tokens for the dev user (use the Authorize button in `/docs`). Rules: [ARCHITECTURE › Auth rules](docs/ARCHITECTURE.md#auth-rules-f25).
 
-Next: F2.6 deploy ([docs/HOSTING.md](docs/HOSTING.md)). See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+- **F2.6 deploy** (in progress): a production Docker image, Railway config (migrations before each deploy, health check), least-privilege database roles (`otr_owner` / `otr_app` / `otr_readonly`, set up by `uv run ontherecord-db-setup`, and used by the test suite too), separate app and migration database URLs, and a prod → local copy script. Still to do: the Railway account steps in [docs/HOSTING.md](docs/HOSTING.md#f26-runbook).
+
+Next: finish F2.6. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.
@@ -59,8 +61,11 @@ uv run ruff check --fix . && uv run ruff format .                               
 uv run alembic revision --autogenerate -m "<what>"   # new migration from model changes (review it)
 uv run alembic upgrade head                          # apply migrations
 docker compose up -d / docker compose down           # start / stop Postgres (add -v to wipe data)
+uv run ontherecord-db-setup                          # create the otr_* roles + database (asks for an admin URL)
+docker build -t ontherecord-api .                    # the production image
+OTR_SOURCE_DATABASE_URL=… scripts/restore-prod-copy.sh   # copy prod into a local *copy* database
 ```
-Tests need Postgres running: they create `ontherecord_test` on the same server, migrate it from scratch once per run, and roll each test back.
+Tests need Postgres running: they recreate `ontherecord_test` on the same server with the production roles, migrate it as `otr_owner`, run every test as `otr_app`, and roll each test back.
 
 ## Commands (from `web/`)
 ```bash
@@ -70,7 +75,8 @@ npm run lint && npm run typecheck && npm test && npm run build   # all checks
 ## Project layout
 ```
 backend/            Python package, tests, Alembic, compose.yaml (local Postgres), .env.example
-  src/ontherecord/  main.py (app factory), config.py, db.py, models/, schemas/, services/, api/
+                    Dockerfile + railway.json (deploy), scripts/ (prod → local copy)
+  src/ontherecord/  main.py (app factory), config.py, db.py, db_setup.py (roles), models/, schemas/, services/, api/
   migrations/       Alembic migrations (versions/0001_… sequential ids)
 web/                React app (src/)
 ios/                SwiftUI app (placeholder)
