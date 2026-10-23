@@ -20,15 +20,18 @@ from sqlalchemy import Connection, Engine, create_engine, make_url, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
-from ontherecord.api.deps import get_current_user
 from ontherecord.config import Settings
 from ontherecord.db import get_session
 from ontherecord.main import create_app
 from ontherecord.models import User
+from ontherecord.services.auth import issue_access_token
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 MakeApp = Callable[..., FastAPI]
+
+TEST_JWT_SECRET = "test-only-secret-at-least-32-characters-long"
+TEST_APPLE_CLIENT_ID = "com.example.ontherecord"
 
 
 class DatabaseEnv(BaseSettings):
@@ -110,29 +113,37 @@ def make_app(database_url: str) -> MakeApp:
 
     def _make(**overrides: object) -> FastAPI:
         settings = Settings.model_validate(
-            {"env": "test", "database_url": database_url} | overrides
+            {
+                "env": "test",
+                "database_url": database_url,
+                "jwt_secret": TEST_JWT_SECRET,
+                "apple_client_ids": [TEST_APPLE_CLIENT_ID],
+            }
+            | overrides
         )
         return create_app(settings)
 
     return _make
 
 
+def _signed_in_client(app: FastAPI, session: Session, apple_sub: str, name: str) -> TestClient:
+    """A client sending a real access token, so every test goes through the real auth path."""
+    user = User(apple_sub=apple_sub, display_name=name)
+    session.add(user)
+    session.commit()
+    app.dependency_overrides[get_session] = lambda: session
+    token = issue_access_token(user.id, app.state.settings)
+    return TestClient(app, headers={"Authorization": f"Bearer {token}"})
+
+
 @pytest.fixture
 def client(make_app: MakeApp, db_session: Session) -> Iterator[TestClient]:
-    app = make_app()
-    app.dependency_overrides[get_session] = lambda: db_session
-    with TestClient(app) as c:
+    with _signed_in_client(make_app(), db_session, "test-user", "Test User") as c:
         yield c
 
 
 @pytest.fixture
 def other_client(make_app: MakeApp, db_session: Session) -> Iterator[TestClient]:
     """A second, unrelated user on the same database: for user-scoping tests (D2)."""
-    other = User(apple_sub="other-user", display_name="Other User")
-    db_session.add(other)
-    db_session.commit()
-    app = make_app()
-    app.dependency_overrides[get_session] = lambda: db_session
-    app.dependency_overrides[get_current_user] = lambda: other
-    with TestClient(app) as c:
+    with _signed_in_client(make_app(), db_session, "other-user", "Other User") as c:
         yield c

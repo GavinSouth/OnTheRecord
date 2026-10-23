@@ -12,7 +12,7 @@ OnTheRecord: a personal life-management app with **habits** (daily checks + heat
 - [x] F2.2 Habits API: `Habit` + `HabitCheck` models, CRUD, archive, idempotent check/uncheck by date, `for_date` today view, streak/completion stats, heatmap aggregate.
 - [x] F2.3 Todos API: nested `TodoList` (cycle-safe moves, subtree soft delete), `TodoItem` (complete/reopen, move, reorder), append-only `TodoEvent` log, history endpoints.
 - [x] F2.4 Notes API: `Note` CRUD, newest-first cursor pagination, Postgres full-text search.
-- [ ] F2.5 Auth: Sign in with Apple token verification, server-issued access + refresh tokens, replace the dev stub, user-scoping tests (one user can never see another's rows).
+- [x] F2.5 Auth: Sign in with Apple token verification, server-issued access + refresh tokens, replace the dev stub, user-scoping tests (one user can never see another's rows).
 - [ ] F2.6 Deploy (plan: [docs/HOSTING.md](docs/HOSTING.md)): verify Railway (Postgres 18, backups + tested restore, TLS, encryption at rest; else fallback), dedicated `ontherecord` project (API + Postgres 18), least-privilege roles (`otr_owner` migrations, `otr_app` API, `otr_readonly` for your SQL tools) + `sandbox` database, split app/migration database URLs, migrations on deploy, secrets as env vars, HTTPS, Compose role parity locally, `pg_dump` → local restore script.
 
 ## Phase 3 — iOS  [NOT STARTED]

@@ -125,7 +125,7 @@ Yes, it's a normal Postgres you fully own. Anything that speaks Postgres can con
 2. Create the `ontherecord` project: Postgres 18 service (volume at `/var/lib/postgresql`) + API service from `backend/`.
 3. Run the role/database SQL above. Store the passwords in Railway variables + your password manager.
 4. Code: split app vs migration URLs; deploy runs migrations as `otr_owner`; Compose init script for local role parity.
-5. Secrets: `OTR_ENV=prod`, `OTR_DATABASE_URL`, `OTR_MIGRATIONS_DATABASE_URL` (+ auth secrets from F2.5).
+5. Secrets: `OTR_ENV=prod`, `OTR_DATABASE_URL`, `OTR_MIGRATIONS_DATABASE_URL` `OTR_JWT_SECRET` (a fresh one, never the dev value), `OTR_APPLE_CLIENT_IDS` (the iOS bundle id, from F3.1). The app refuses to start in prod without the last two.
 6. HTTPS URL for the iOS app; `GET /api/v1/health` as the host's health check.
 7. Backups: confirm the schedule, do one test restore into `sandbox`, and write the restore steps into this file.
 8. Data access: connect DBeaver (or similar) as `otr_readonly`; write a `pg_dump` → local restore script (`backend/scripts/`).

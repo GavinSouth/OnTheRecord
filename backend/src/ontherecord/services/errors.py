@@ -18,3 +18,7 @@ class ConflictError(DomainError):
 
 class InvalidInputError(DomainError):
     """Well-formed input that breaks a business rule (e.g. a check dated in the future)."""
+
+
+class UnauthorizedError(DomainError):
+    """Missing, invalid, expired or revoked credentials. Deliberately vague to the caller."""

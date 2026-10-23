@@ -9,7 +9,7 @@ A personal life-management app: **habits** (daily checks + contribution-style he
 Backend:
 - Python 3.13, managed by **uv** (deps + interpreter; lockfile `backend/uv.lock`)
 - **ruff** (lint + format), **mypy** (strict, `src/`), **pytest**, **pre-commit**
-- Chosen in F1.2 (`docs/ARCHITECTURE.md`), installed in F2.1: **FastAPI**, **PostgreSQL 18** (Docker locally), **SQLAlchemy 2** (sync) + **Alembic**, psycopg 3
+- Chosen in F1.2 (`docs/ARCHITECTURE.md`), installed in F2.1: **FastAPI**, **PostgreSQL 18** (Docker locally), **SQLAlchemy 2** (sync) + **Alembic**, psycopg 3; **PyJWT** for auth (F2.5)
 
 Frontend (`web/`):
 - Node 24 LTS (user-level at `~/.local/share/node`, symlinked into `~/.local/bin`), npm
@@ -29,7 +29,7 @@ iOS (`ios/`):
 
 ## Commands
 Run from `backend/`:
-- Setup: `uv sync`, `cp .env.example .env`, `docker compose up -d` (Postgres; OrbStack locally), `uv run alembic upgrade head`
+- Setup: `uv sync`, `cp .env.example .env` (set `OTR_JWT_SECRET`), `docker compose up -d` (Postgres; OrbStack locally), `uv run alembic upgrade head`
 - Dev server: `uv run ontherecord` → http://127.0.0.1:8000 (`/docs`)
 - Migrations: `uv run alembic revision --autogenerate -m "<what>"` (review the output), `uv run alembic upgrade head`
 - All checks: `uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run pytest`

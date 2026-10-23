@@ -1,22 +1,14 @@
 import uuid
 
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session
-
-from ontherecord.models import User
-from tests.conftest import MakeApp
 
 
-def test_dev_stub_creates_one_user(client: TestClient, db_session: Session) -> None:
-    first = client.get("/api/v1/me")
-    second = client.get("/api/v1/me")
-
-    assert first.status_code == 200
-    assert first.json() == second.json()
-    assert first.json()["display_name"] == "Dev User"
-    assert "apple_sub" not in first.json()
-    assert db_session.scalar(select(func.count()).select_from(User)) == 1
+def test_me_returns_the_signed_in_user(client: TestClient) -> None:
+    res = client.get("/api/v1/me")
+    assert res.status_code == 200
+    assert res.json()["display_name"] == "Test User"
+    assert res.json()["timezone"] == "UTC"
+    assert "apple_sub" not in res.json()
 
 
 def test_ids_are_uuidv7(client: TestClient) -> None:
@@ -24,7 +16,22 @@ def test_ids_are_uuidv7(client: TestClient) -> None:
     assert user_id.version == 7
 
 
-def test_dev_stub_refuses_in_prod(make_app: MakeApp) -> None:
-    with TestClient(make_app(env="prod")) as c:
-        res = c.get("/api/v1/me")
-    assert res.status_code == 401
+def test_update_me(client: TestClient) -> None:
+    res = client.patch("/api/v1/me", json={"timezone": "America/Chicago"})
+    assert res.status_code == 200
+    assert res.json()["timezone"] == "America/Chicago"
+    assert res.json()["display_name"] == "Test User"  # untouched
+
+    res = client.patch("/api/v1/me", json={"display_name": "  Gavin  "})
+    assert res.json()["display_name"] == "Gavin"
+    assert client.get("/api/v1/me").json()["timezone"] == "America/Chicago"
+
+
+def test_update_me_validates(client: TestClient) -> None:
+    for body in (
+        {"timezone": "Mars/Olympus"},
+        {"timezone": "../../etc/passwd"},
+        {"timezone": None},
+        {"display_name": "x" * 101},
+    ):
+        assert client.patch("/api/v1/me", json=body).status_code == 422, body
