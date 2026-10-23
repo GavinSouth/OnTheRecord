@@ -1,20 +1,22 @@
 # OnTheRecord
 
-Purpose TBD (ROADMAP F1.2).
+A personal life-management app: a **habit tracker** with a GitHub-style heatmap, a **todo** list with nested lists and history, and **notes** for quick capture (later synced to Obsidian). iPhone-first, with a web app for charts and analytics.
 
-**Status:** scaffold only (F1.1). A Python backend package, a React web shell, and an iOS placeholder, with linting, type checks, tests, and CI wired up. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+**Status:** scaffold (F1.1) and product & data design (F1.2) done. Next: design system (F1.3), then the backend (Phase 2). A Python backend package, a React web shell, and an iOS placeholder, with linting, type checks, tests, and CI wired up. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture (planned)
-- **Backend** (`backend/`): Python 3.13 HTTP API and database (framework and storage chosen in F1.2).
-- **Web app** (`web/`): React + TypeScript + Vite + Tailwind.
-- **iOS** (`ios/`): SwiftUI app on the same API.
+- **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.
+- **iOS** (`ios/`): SwiftUI, the primary client for daily use. Built before web.
+- **Web app** (`web/`): React + TypeScript + Vite + Tailwind, for analytics (heatmaps, trends, history).
+- Both clients are generated from the backend's OpenAPI spec. Auth: Sign in with Apple.
 
-Decisions: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Decisions, data model, and API: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tech stack
 | Concern | Tool |
 |---|---|
 | Python + dependencies | [uv](https://docs.astral.sh/uv/) (`backend/uv.lock`) |
+| API / database (from F2.1) | FastAPI, PostgreSQL 18, SQLAlchemy 2, Alembic, psycopg 3 |
 | Lint + format | ruff |
 | Type checking | mypy (strict) |
 | Tests | pytest |

@@ -1,7 +1,7 @@
 # Project: OnTheRecord
 
 ## Purpose
-TBD. Describe what OnTheRecord does and for whom once the idea is settled (ROADMAP F1.2).
+A personal life-management app: **habits** (daily checks + contribution-style heatmap), **todos** (nested lists, completion history), and **notes** (quick capture; later synced to an Obsidian vault). Single user (the owner) for now, built so it can open to friends/the public later. iPhone-first; web for analytics and richer views. Data is sensitive.
 
 (Scope will increase in time)
 
@@ -9,7 +9,7 @@ TBD. Describe what OnTheRecord does and for whom once the idea is settled (ROADM
 Backend:
 - Python 3.13, managed by **uv** (deps + interpreter; lockfile `backend/uv.lock`)
 - **ruff** (lint + format), **mypy** (strict, `src/`), **pytest**, **pre-commit**
-- HTTP framework, database, and ORM: not chosen yet (decided in ROADMAP F1.2, recorded in `docs/ARCHITECTURE.md`)
+- Chosen in F1.2 (`docs/ARCHITECTURE.md`), installed in F2.1: **FastAPI**, **PostgreSQL 18** (Docker locally), **SQLAlchemy 2** (sync) + **Alembic**, psycopg 3
 
 Frontend (`web/`):
 - Node 24 LTS (user-level at `~/.local/share/node`, symlinked into `~/.local/bin`), npm
@@ -17,7 +17,7 @@ Frontend (`web/`):
 - **oxlint** (lint), `tsc` (types), **Vitest** + Testing Library (tests)
 
 iOS (`ios/`):
-- Swift / SwiftUI on the same HTTP API as the web app. Not started.
+- Swift / SwiftUI on the same HTTP API as the web app; the primary client. Not started (Phase 3, before web).
 
 ## Layout
 - `backend/` — Python package (`src/ontherecord/`), tests (`tests/`), `pyproject.toml` (tool config); local data in `backend/data/` (git-ignored)
