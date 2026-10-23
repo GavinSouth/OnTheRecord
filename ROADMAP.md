@@ -9,7 +9,7 @@ OnTheRecord: a personal life-management app with **habits** (daily checks + heat
 
 ## Phase 2 — Backend Core  [IN PROGRESS]
 - [x] F2.1 Backend foundation: FastAPI app factory, settings (pydantic-settings), local Postgres (Docker Compose), SQLAlchemy 2 + Alembic, `User` model + first migration, `GET /health`, dev-only current-user stub, pytest fixtures against a real test database, CI Postgres service.
-- [ ] F2.2 Habits API: `Habit` + `HabitCheck` models, CRUD, archive, idempotent check/uncheck by date, `for_date` today view, streak/completion stats, heatmap aggregate.
+- [x] F2.2 Habits API: `Habit` + `HabitCheck` models, CRUD, archive, idempotent check/uncheck by date, `for_date` today view, streak/completion stats, heatmap aggregate.
 - [ ] F2.3 Todos API: nested `TodoList` (cycle-safe moves, subtree soft delete), `TodoItem` (complete/reopen, move, reorder), append-only `TodoEvent` log, history endpoints.
 - [ ] F2.4 Notes API: `Note` CRUD, newest-first cursor pagination, Postgres full-text search.
 - [ ] F2.5 Auth: Sign in with Apple token verification, server-issued access + refresh tokens, replace the dev stub, user-scoping tests (one user can never see another's rows).

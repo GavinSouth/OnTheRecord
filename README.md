@@ -2,7 +2,11 @@
 
 A personal life-management app: a **habit tracker** with a GitHub-style heatmap, a **todo** list with nested lists and history, and **notes** for quick capture (later synced to Obsidian). iPhone-first, with a web app for charts and analytics.
 
-**Status:** Phase 1 done (scaffold, product & data design, design system). Phase 2 in progress: F2.1 backend foundation: a FastAPI app with settings, local Postgres in Docker, SQLAlchemy + Alembic, a `users` table, `GET /api/v1/health`, `GET /api/v1/me` (dev-only user stub), and tests against real Postgres (locally and in CI). Next: F2.2 habits API. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+**Status:** Phase 1 done (scaffold, product & data design, design system). Phase 2 in progress:
+- **F2.1 backend foundation**: a FastAPI app with settings, local Postgres in Docker, SQLAlchemy + Alembic, a `users` table, `GET /api/v1/health`, `GET /api/v1/me` (dev-only user stub), and tests against real Postgres (locally and in CI).
+- **F2.2 habits API**: habits (CRUD, archive, ordering, six design-system colours, weekday schedules), idempotent daily check/skip/uncheck, a `for_date` Today view, streak and completion stats, and a per-day heatmap. Rules: [ARCHITECTURE › Habit rules](docs/ARCHITECTURE.md#habit-rules-f22).
+
+Next: F2.3 todos API. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.

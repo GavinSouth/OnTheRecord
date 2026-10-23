@@ -20,9 +20,11 @@ from sqlalchemy import Connection, Engine, create_engine, make_url, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from ontherecord.api.deps import get_current_user
 from ontherecord.config import Settings
 from ontherecord.db import get_session
 from ontherecord.main import create_app
+from ontherecord.models import User
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
@@ -119,5 +121,18 @@ def make_app(database_url: str) -> MakeApp:
 def client(make_app: MakeApp, db_session: Session) -> Iterator[TestClient]:
     app = make_app()
     app.dependency_overrides[get_session] = lambda: db_session
+    with TestClient(app) as c:
+        yield c
+
+
+@pytest.fixture
+def other_client(make_app: MakeApp, db_session: Session) -> Iterator[TestClient]:
+    """A second, unrelated user on the same database: for user-scoping tests (D2)."""
+    other = User(apple_sub="other-user", display_name="Other User")
+    db_session.add(other)
+    db_session.commit()
+    app = make_app()
+    app.dependency_overrides[get_session] = lambda: db_session
+    app.dependency_overrides[get_current_user] = lambda: other
     with TestClient(app) as c:
         yield c
