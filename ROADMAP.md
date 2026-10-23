@@ -2,10 +2,10 @@
 
 OnTheRecord: a personal life-management app with **habits** (daily checks + heatmap), **todos** (nested lists + history), and **notes** (quick capture, later Obsidian). Three clients of one system: a **Python backend** (HTTP API + data), an **iOS app** (daily use), and a **web app** (analytics). Decisions: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Phase 1 — Foundation & Design  [IN PROGRESS]
+## Phase 1 — Foundation & Design  [DONE]
 - [x] F1.1 Scaffold: uv + Python 3.13 package in `backend/`, ruff/mypy/pytest, pre-commit, GitHub Actions CI, React + TypeScript + Vite + Tailwind shell in `web/`, `ios/` placeholder, Claude allowlist + `/finish-feature` skill. (Carried over from a previous project and stripped to the structure.)
 - [x] F1.2 Product & data design. Scope (habits, todos, notes; v1 online, single user), entities and relationships, stack (FastAPI + PostgreSQL 18 + SQLAlchemy 2 + Alembic), auth direction (Sign in with Apple), phase order (backend → iOS → web). Output: `docs/ARCHITECTURE.md` (decisions D1–D15, entity diagram, v1 API resource list).
-- [ ] F1.3 Design system: create the OnTheRecord design system in Claude Design and link it from `docs/ARCHITECTURE.md`.
+- [x] F1.3 Design system: [OnTheRecord](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) in Claude Design, "calm native" direction: light/dark tokens (colour, heatmap levels, habit colours, iOS-mirroring type, spacing, radii, sizes), brand book, HabitRow / Heatmap / TodoRow components, cover. Linked from `docs/ARCHITECTURE.md`.
 
 ## Phase 2 — Backend Core  [NOT STARTED]
 - [ ] F2.1 Backend foundation: FastAPI app factory, settings (pydantic-settings), local Postgres (Docker Compose), SQLAlchemy 2 + Alembic, `User` model + first migration, `GET /health`, dev-only current-user stub, pytest fixtures against a real test database, CI Postgres service.

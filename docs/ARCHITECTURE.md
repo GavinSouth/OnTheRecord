@@ -152,5 +152,9 @@ backend/migrations/  Alembic
 Obsidian sync and the notes agent, offline sync, reminders and notifications, recurring todos, tags, numeric and "N× per week" habits, sharing, public sign-up. See ROADMAP Phase 5.
 
 ## Design
-- Design system: TBD (ROADMAP F1.3).
-- Canvases: TBD.
+- **Design system:** [OnTheRecord](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) (Claude Design, F1.3). The truth for look and components. Direction: **calm native**. iOS-feeling, system fonts (SF Pro / SF Mono), warm-grey neutrals, one green `accent`, and the habit heatmap as the signature element. Light and dark.
+  - Tokens: colour (ground, ink, accent, `heat-0`…`heat-4` + `heat-skip`, `warning`, `danger`, six `habit-*` colours), type styles mirroring iOS text styles, 4-pt spacing, radii by role, `shadow-float`, sizes (44 tap target, 28 check, 12 heatmap cell).
+  - Components: HabitRow, Heatmap, TodoRow (+ cover).
+  - Rules worth remembering: a missed day is never red; `danger` is only for destructive actions; habit colours never carry meaning without the name.
+  - Using it: web maps tokens to CSS variables + Tailwind `@theme` (F4.1); iOS maps colours to asset-catalog Color Sets and type to `Font.TextStyle` (F3.1).
+- Canvases: none yet. The first screens (iOS Today, todos, notes) are designed in F3.1.

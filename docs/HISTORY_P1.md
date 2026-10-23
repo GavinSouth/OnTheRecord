@@ -45,3 +45,16 @@ ROADMAP.md tracks feature completion; this file is the context a new session nee
 - Done: `docs/ARCHITECTURE.md` (D1–D15, entity diagram, v1 API), ROADMAP restructured (Phases 2–5), purpose + stack in README and CLAUDE.md. Checks green (backend: ruff, format, mypy, pytest 2 passed; web unchanged). Design system: no change (no UI work).
 - Decisions: see the entry above. Short version: FastAPI + Postgres 18 + SQLAlchemy 2 (sync) + Alembic; `user_id` everywhere; sync-ready but online-only; local-date habit checks with derived misses; append-only todo events; Markdown notes; Sign in with Apple; OpenAPI-generated clients; Backend → iOS → Web.
 - Next: F1.3 design system. Open questions for later features: host choice (F2.6); Apple Developer account needed by F2.5/F3.1.
+
+### Explainer: habit checks as dates (D8)
+- Asked: why habit checks use dates instead of timestamps. Explained in chat (no code change): a check answers a calendar-day question; timestamps need a timezone to map back to a day, which breaks with travel, late-night check-ins, and backfilling.
+
+### Explainer: todo event log vs current state (D9)
+- Asked: explain the append-only `todo_events` table vs storing only current state. Explained in chat (no code change): we use both. Rows hold the current state for fast reads; events hold the history for analytics, audit, undo, and the future agent and sync. Both are written in one transaction.
+
+### F1.3 — Design system complete
+- Asked: "No more explaining things right now. Let's do some developing." Picked up the next unchecked feature, F1.3. User chose the **calm native** direction (over ledger, bold/playful, or reusing ControlTower).
+- Done: created the [OnTheRecord design system](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) (Claude Design, Design System type) with `tokens.json` (light + dark), a brand-book README (principles, voice, colour/type/space, iconography, how web and iOS consume it), components HabitRow, Heatmap, TodoRow (demo data, interactive previews), and a cover. Linked from `docs/ARCHITECTURE.md` › Design; ROADMAP ticked, Phase 1 marked done.
+- Decisions: system fonts (SF Pro/SF Mono) so iOS gets Dynamic Type for free and the web needs no font downloads; one green `accent`; heatmap levels step in lightness (colour-blind safe); a missed day is `heat-0`, never red; `danger` only for destructive actions; type styles mirror iOS text styles; 4-pt spacing; flat surfaces with hairline separators, a shadow only for floating elements; six user-pickable habit colours. Streaks shown as text, no gamification icons. No logo yet (plain type).
+- Design system: created (this feature).
+- Next: F2.1 backend foundation (FastAPI, settings, Docker Postgres, SQLAlchemy + Alembic, User model, health, test DB fixtures, CI Postgres). Still open: web icon set (F4.1).

@@ -2,7 +2,7 @@
 
 A personal life-management app: a **habit tracker** with a GitHub-style heatmap, a **todo** list with nested lists and history, and **notes** for quick capture (later synced to Obsidian). iPhone-first, with a web app for charts and analytics.
 
-**Status:** scaffold (F1.1) and product & data design (F1.2) done. Next: design system (F1.3), then the backend (Phase 2). A Python backend package, a React web shell, and an iOS placeholder, with linting, type checks, tests, and CI wired up. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+**Status:** Phase 1 done: scaffold (F1.1), product & data design (F1.2), design system (F1.3). Next: the backend (Phase 2, starting with F2.1). A Python backend package, a React web shell, and an iOS placeholder, with linting, type checks, tests, and CI wired up. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture (planned)
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.
@@ -10,7 +10,7 @@ A personal life-management app: a **habit tracker** with a GitHub-style heatmap,
 - **Web app** (`web/`): React + TypeScript + Vite + Tailwind, for analytics (heatmaps, trends, history).
 - Both clients are generated from the backend's OpenAPI spec. Auth: Sign in with Apple.
 
-Decisions, data model, and API: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Decisions, data model, and API: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Look and components: the [OnTheRecord design system](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) (calm, iOS-native; light and dark).
 
 ## Tech stack
 | Concern | Tool |
