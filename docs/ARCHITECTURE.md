@@ -32,7 +32,7 @@ Single user (the owner) for now, built so it can open to friends or the public l
 | D12 | **The OpenAPI spec is the API contract.** Clients are generated from it: Swift (`swift-openapi-generator`) and TypeScript (`openapi-typescript` + `openapi-fetch`) | One source of truth. A backend change that breaks a client fails type-checking, not at runtime. |
 | D13 | **Security: TLS in transit + the host's encryption at rest. No end-to-end encryption.** Secrets only in env vars | With E2E, the server couldn't read the data, which would rule out server-side analytics and the notes agent. Can be revisited for specific fields later. |
 | D14 | **Phase order: Backend → iOS → Web** | The phone is the daily driver. The API is still designed for web analytics from the start (aggregate endpoints, D9 events). |
-| D15 | **Hosting: decided in F2.6**, before the first deploy (likely Fly.io or Railway + managed Postgres) | The phone needs a reachable server. No reason to lock in a host before there is something to deploy. |
+| D15 | **Hosting: decided in F2.6**, before the first deploy. Plan: Railway, with a dedicated Postgres 18 for OnTheRecord and least-privilege roles ([HOSTING.md](HOSTING.md)) | The phone needs a reachable server. No reason to lock in a host before there is something to deploy. A dedicated database keeps sensitive data isolated from other apps. |
 
 ## Data model
 

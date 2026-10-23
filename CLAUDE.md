@@ -23,7 +23,7 @@ iOS (`ios/`):
 - `backend/` — Python package (`src/ontherecord/`), tests (`tests/`, need Postgres running), Alembic (`migrations/`), `compose.yaml` (local Postgres), `.env.example`, `pyproject.toml` (tool config)
 - `web/` — React app (`src/`)
 - `ios/` — SwiftUI app (placeholder)
-- `docs/` — `HISTORY_P<phase>.md` context log per phase; `ARCHITECTURE.md` (decisions + design links); `python_research.md` (user's tooling notes)
+- `docs/` — `HISTORY_P<phase>.md` context log per phase; `ARCHITECTURE.md` (decisions + design links); `HOSTING.md` (deploy + database roles plan); `python_research.md` (user's tooling notes)
 - `.github/workflows/ci.yml` — CI: lint, format, types, tests on push/PR
 - `.claude/` — project settings (permission allowlist) and skills (`/finish-feature`)
 

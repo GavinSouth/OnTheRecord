@@ -13,7 +13,7 @@ OnTheRecord: a personal life-management app with **habits** (daily checks + heat
 - [ ] F2.3 Todos API: nested `TodoList` (cycle-safe moves, subtree soft delete), `TodoItem` (complete/reopen, move, reorder), append-only `TodoEvent` log, history endpoints.
 - [ ] F2.4 Notes API: `Note` CRUD, newest-first cursor pagination, Postgres full-text search.
 - [ ] F2.5 Auth: Sign in with Apple token verification, server-issued access + refresh tokens, replace the dev stub, user-scoping tests (one user can never see another's rows).
-- [ ] F2.6 Deploy: choose host + managed Postgres, secrets, migrations on deploy, HTTPS, backups.
+- [ ] F2.6 Deploy (plan: [docs/HOSTING.md](docs/HOSTING.md)): verify Railway (Postgres 18, backups + tested restore, TLS, encryption at rest; else fallback), dedicated `ontherecord` project (API + Postgres 18), least-privilege roles (`otr_owner` migrations, `otr_app` API, `otr_readonly` for your SQL tools) + `sandbox` database, split app/migration database URLs, migrations on deploy, secrets as env vars, HTTPS, Compose role parity locally, `pg_dump` → local restore script.
 
 ## Phase 3 — iOS  [NOT STARTED]
 - [ ] F3.1 iOS project: Xcode app in `ios/`, client generated from OpenAPI (`swift-openapi-generator`), Sign in with Apple, app shell + navigation (design canvas first).
@@ -33,3 +33,5 @@ OnTheRecord: a personal life-management app with **habits** (daily checks + heat
 - Reminders and push notifications (habits, due todos).
 - Recurring todos; tags; numeric and "N× per week" habits.
 - Sharing and public sign-up.
+- Data-engineering practice: `analytics` schema (derived views/rollups that can also feed the web dashboards), scheduled exports or a dbt project, DuckDB/pandas notebooks on a restored copy.
+- `side-projects` Railway project with one shared Postgres (one database + role per app) for future small apps.

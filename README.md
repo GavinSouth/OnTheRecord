@@ -10,7 +10,7 @@ A personal life-management app: a **habit tracker** with a GitHub-style heatmap,
 - **Web app** (`web/`): React + TypeScript + Vite + Tailwind, for analytics (heatmaps, trends, history).
 - Both clients are generated from the backend's OpenAPI spec. Auth: Sign in with Apple.
 
-Decisions, data model, and API: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Look and components: the [OnTheRecord design system](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) (calm, iOS-native; light and dark).
+Decisions, data model, and API: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Hosting, database roles, and how to query your own data: [docs/HOSTING.md](docs/HOSTING.md). Look and components: the [OnTheRecord design system](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) (calm, iOS-native; light and dark).
 
 ## Tech stack
 | Concern | Tool |
@@ -66,7 +66,7 @@ backend/            Python package, tests, Alembic, compose.yaml (local Postgres
   migrations/       Alembic migrations (versions/0001_… sequential ids)
 web/                React app (src/)
 ios/                SwiftUI app (placeholder)
-docs/               ARCHITECTURE.md (decisions), HISTORY_P<phase>.md (context log per phase), python_research.md (tooling notes)
+docs/               ARCHITECTURE.md (decisions), HOSTING.md (deploy + database plan), HISTORY_P<phase>.md (context log per phase), python_research.md (tooling notes)
 .github/workflows/  CI
 .claude/            Claude Code settings + /finish-feature skill
 .gitignore          secrets (.env), venvs, caches, Xcode, OS/editor files
