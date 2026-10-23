@@ -48,3 +48,5 @@ files = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+# Deprecations fail the run, so upgrades surface them immediately.
+filterwarnings = ["error"]

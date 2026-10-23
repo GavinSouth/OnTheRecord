@@ -2,18 +2,10 @@ import enum
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import (
-    ARRAY,
-    CheckConstraint,
-    Enum,
-    ForeignKey,
-    Index,
-    SmallInteger,
-    UniqueConstraint,
-)
+from sqlalchemy import ARRAY, CheckConstraint, ForeignKey, Index, SmallInteger, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from ontherecord.models.base import Base, SoftDelete, Timestamps, UUIDPrimaryKey
+from ontherecord.models.base import Base, SoftDelete, Timestamps, UUIDPrimaryKey, text_enum
 
 
 class HabitColor(enum.StrEnum):
@@ -32,19 +24,6 @@ class CheckStatus(enum.StrEnum):
     SKIPPED = "skipped"  # sick, travel: neither counts nor breaks a streak (D8)
 
 
-def _text_enum(cls: type[enum.StrEnum], name: str) -> Enum:
-    # varchar + CHECK instead of a native Postgres enum: adding a value later is a
-    # one-line constraint change instead of ALTER TYPE.
-    return Enum(
-        cls,
-        name=name,
-        native_enum=False,
-        create_constraint=True,
-        length=16,
-        values_callable=lambda e: [m.value for m in e],
-    )
-
-
 class Habit(UUIDPrimaryKey, Timestamps, SoftDelete, Base):
     __tablename__ = "habits"
     __table_args__ = (
@@ -60,7 +39,7 @@ class Habit(UUIDPrimaryKey, Timestamps, SoftDelete, Base):
     name: Mapped[str]
     description: Mapped[str | None]
     color: Mapped[HabitColor] = mapped_column(
-        _text_enum(HabitColor, "habit_color"), server_default=HabitColor.GREEN.value
+        text_enum(HabitColor, "habit_color"), server_default=HabitColor.GREEN.value
     )
     # ISO weekdays (Mon=1 … Sun=7), sorted. All seven = daily.
     schedule_days: Mapped[list[int]] = mapped_column(ARRAY(SmallInteger))
@@ -85,4 +64,4 @@ class HabitCheck(UUIDPrimaryKey, Timestamps, SoftDelete, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     habit_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("habits.id", ondelete="CASCADE"))
     date: Mapped[date]
-    status: Mapped[CheckStatus] = mapped_column(_text_enum(CheckStatus, "check_status"))
+    status: Mapped[CheckStatus] = mapped_column(text_enum(CheckStatus, "check_status"))

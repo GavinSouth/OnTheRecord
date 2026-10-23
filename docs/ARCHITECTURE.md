@@ -146,6 +146,17 @@ Implemented in `services/habit_stats.py` (pure functions, unit-tested on fixed d
 - **Enums** (`color`, `status`) are `varchar` + `CHECK`, not native Postgres enums, so adding a value is a simple migration.
 - **Errors**: services raise `NotFoundError` / `ConflictError` / `InvalidInputError` (`services/errors.py`); `main.py` maps them to 404 / 409 / 422 with FastAPI's `{"detail": …}` shape. Another user's row is a 404, indistinguishable from a missing one.
 
+## Todo rules (F2.3)
+Implemented in `services/todos.py`.
+- **Tree**: `GET /lists` is flat with `parent_id`, plus each list's `open_count`; clients build the tree. New lists and items go to the end of their siblings unless a `position` is given.
+- **Cycle-safe moves**: moving a list walks up from the new parent with a recursive CTE (a query that repeats on its own results); meeting the moved list means a loop → 409. Moving into an unknown list, or another user's, is a 404.
+- **Subtree delete**: deleting a list soft-deletes every sublist below it and all their items. Each item gets a `deleted` event with `{"via_list_id": …}`.
+- **Events (D9)**: every item change writes its event in the same transaction. One PATCH can write several, in order `edited` → `moved` → `completed`/`reopened`. `edited` stores only fields that really changed (`{"changes": {field: {"from", "to"}}}`); a no-op PATCH writes nothing. **A pure reorder writes no event**: it's layout, not history. `restored` is reserved for a future undo.
+- **Append-only, enforced twice**: by the service (insert only) and by a Postgres trigger that rejects any `UPDATE` on `todo_events` (migration `0003`). Deletes still cascade with their item or user.
+- **History stays readable**: `GET /items/{id}/events` works for deleted items.
+- **Pagination**: `GET /todo-events` is ordered by id. UUIDv7 ids sort by creation time, so id order is chronological and the last id is the cursor (`after`). `from`/`to` are local days in the user's timezone. Default 100 per page, max 500.
+- **Ordering**: open items by `position`; with `completed=true`, newest completed first.
+
 ## Backend layout (F2.1)
 ```
 backend/

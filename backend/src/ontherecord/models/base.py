@@ -1,9 +1,10 @@
 """Declarative base and the columns every table shares."""
 
+import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, MetaData, func, text
+from sqlalchemy import DateTime, Enum, MetaData, func, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 # Deterministic constraint names, so Alembic can find (and drop) them later.
@@ -42,3 +43,16 @@ class SoftDelete:
     """Rows are hidden, not removed (D7): sync and history need to know what went away."""
 
     deleted_at: Mapped[datetime | None] = mapped_column(sort_order=11)
+
+
+def text_enum(cls: type[enum.StrEnum], name: str) -> Enum:
+    """varchar + CHECK instead of a native Postgres enum: adding a value later is a
+    one-line constraint change instead of ALTER TYPE."""
+    return Enum(
+        cls,
+        name=name,
+        native_enum=False,
+        create_constraint=True,
+        length=16,
+        values_callable=lambda e: [m.value for m in e],
+    )
