@@ -1,0 +1,4 @@
+Alembic migrations. From backend/:
+  uv run alembic upgrade head                          apply
+  uv run alembic revision --autogenerate -m "<what>"   new migration from model changes (review it!)
+  uv run alembic downgrade -1                          undo the last one

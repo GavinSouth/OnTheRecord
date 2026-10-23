@@ -12,6 +12,23 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      # Real Postgres for the tests (D4); conftest creates and migrates the test database.
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: ontherecord
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: ontherecord
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ontherecord"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    env:
+      OTR_TEST_DATABASE_URL: postgresql+psycopg://ontherecord:ci-only@localhost:5432/ontherecord_test
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6

@@ -7,8 +7,8 @@ OnTheRecord: a personal life-management app with **habits** (daily checks + heat
 - [x] F1.2 Product & data design. Scope (habits, todos, notes; v1 online, single user), entities and relationships, stack (FastAPI + PostgreSQL 18 + SQLAlchemy 2 + Alembic), auth direction (Sign in with Apple), phase order (backend → iOS → web). Output: `docs/ARCHITECTURE.md` (decisions D1–D15, entity diagram, v1 API resource list).
 - [x] F1.3 Design system: [OnTheRecord](https://claude.ai/artifact/Y9zVdSXCJazXweNe3JHdHi) in Claude Design, "calm native" direction: light/dark tokens (colour, heatmap levels, habit colours, iOS-mirroring type, spacing, radii, sizes), brand book, HabitRow / Heatmap / TodoRow components, cover. Linked from `docs/ARCHITECTURE.md`.
 
-## Phase 2 — Backend Core  [NOT STARTED]
-- [ ] F2.1 Backend foundation: FastAPI app factory, settings (pydantic-settings), local Postgres (Docker Compose), SQLAlchemy 2 + Alembic, `User` model + first migration, `GET /health`, dev-only current-user stub, pytest fixtures against a real test database, CI Postgres service.
+## Phase 2 — Backend Core  [IN PROGRESS]
+- [x] F2.1 Backend foundation: FastAPI app factory, settings (pydantic-settings), local Postgres (Docker Compose), SQLAlchemy 2 + Alembic, `User` model + first migration, `GET /health`, dev-only current-user stub, pytest fixtures against a real test database, CI Postgres service.
 - [ ] F2.2 Habits API: `Habit` + `HabitCheck` models, CRUD, archive, idempotent check/uncheck by date, `for_date` today view, streak/completion stats, heatmap aggregate.
 - [ ] F2.3 Todos API: nested `TodoList` (cycle-safe moves, subtree soft delete), `TodoItem` (complete/reopen, move, reorder), append-only `TodoEvent` log, history endpoints.
 - [ ] F2.4 Notes API: `Note` CRUD, newest-first cursor pagination, Postgres full-text search.

@@ -1,14 +1,12 @@
 """Smoke test: proves the package imports and the toolchain runs."""
 
-import pytest
-
 import ontherecord
+from ontherecord.main import create_app
 
 
 def test_package_imports() -> None:
     assert ontherecord.__version__ == "0.1.0"
 
 
-def test_main_prints_banner(capsys: pytest.CaptureFixture[str]) -> None:
-    ontherecord.main()
-    assert "OnTheRecord backend" in capsys.readouterr().out
+def test_app_is_importable() -> None:
+    assert callable(create_app)

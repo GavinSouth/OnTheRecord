@@ -20,7 +20,7 @@ iOS (`ios/`):
 - Swift / SwiftUI on the same HTTP API as the web app; the primary client. Not started (Phase 3, before web).
 
 ## Layout
-- `backend/` — Python package (`src/ontherecord/`), tests (`tests/`), `pyproject.toml` (tool config); local data in `backend/data/` (git-ignored)
+- `backend/` — Python package (`src/ontherecord/`), tests (`tests/`, need Postgres running), Alembic (`migrations/`), `compose.yaml` (local Postgres), `.env.example`, `pyproject.toml` (tool config)
 - `web/` — React app (`src/`)
 - `ios/` — SwiftUI app (placeholder)
 - `docs/` — `HISTORY_P<phase>.md` context log per phase; `ARCHITECTURE.md` (decisions + design links); `python_research.md` (user's tooling notes)
@@ -29,7 +29,9 @@ iOS (`ios/`):
 
 ## Commands
 Run from `backend/`:
-- Setup: `uv sync`
+- Setup: `uv sync`, `cp .env.example .env`, `docker compose up -d` (Postgres; OrbStack locally), `uv run alembic upgrade head`
+- Dev server: `uv run ontherecord` → http://127.0.0.1:8000 (`/docs`)
+- Migrations: `uv run alembic revision --autogenerate -m "<what>"` (review the output), `uv run alembic upgrade head`
 - All checks: `uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run pytest`
 - Auto-fix: `uv run ruff check --fix . && uv run ruff format .`
 - Hooks: `uv run pre-commit install` (once), `uv run pre-commit run --all-files`

@@ -2,9 +2,9 @@
 
 A personal life-management app: a **habit tracker** with a GitHub-style heatmap, a **todo** list with nested lists and history, and **notes** for quick capture (later synced to Obsidian). iPhone-first, with a web app for charts and analytics.
 
-**Status:** Phase 1 done: scaffold (F1.1), product & data design (F1.2), design system (F1.3). Next: the backend (Phase 2, starting with F2.1). A Python backend package, a React web shell, and an iOS placeholder, with linting, type checks, tests, and CI wired up. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+**Status:** Phase 1 done (scaffold, product & data design, design system). Phase 2 in progress: F2.1 backend foundation: a FastAPI app with settings, local Postgres in Docker, SQLAlchemy + Alembic, a `users` table, `GET /api/v1/health`, `GET /api/v1/me` (dev-only user stub), and tests against real Postgres (locally and in CI). Next: F2.2 habits API. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
-## Architecture (planned)
+## Architecture
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.
 - **iOS** (`ios/`): SwiftUI, the primary client for daily use. Built before web.
 - **Web app** (`web/`): React + TypeScript + Vite + Tailwind, for analytics (heatmaps, trends, history).
@@ -29,10 +29,15 @@ Decisions, data model, and API: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Lo
 ## Setup
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh   # install uv (once)
+# Docker runtime for local Postgres: OrbStack (https://orbstack.dev) or Docker Desktop
+
 cd backend
 uv sync                      # creates .venv with Python 3.13 + deps
 uv run pre-commit install    # enable git hooks (once)
-cp ../.env.example ../.env   # when secrets are needed (never commit .env)
+cp .env.example .env         # local settings; change the password (never commit .env)
+docker compose up -d         # Postgres 18 on localhost:5432 (data kept in a Docker volume)
+uv run alembic upgrade head  # create/upgrade the schema
+uv run ontherecord           # API on http://127.0.0.1:8000 (docs at /docs), auto-reload
 
 cd ../web
 npm install                  # Node 24 (web/.nvmrc)
@@ -43,7 +48,11 @@ npm run dev                  # http://localhost:5173
 ```bash
 uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run pytest   # all checks
 uv run ruff check --fix . && uv run ruff format .                                          # auto-fix
+uv run alembic revision --autogenerate -m "<what>"   # new migration from model changes (review it)
+uv run alembic upgrade head                          # apply migrations
+docker compose up -d / docker compose down           # start / stop Postgres (add -v to wipe data)
 ```
+Tests need Postgres running: they create `ontherecord_test` on the same server, migrate it from scratch once per run, and roll each test back.
 
 ## Commands (from `web/`)
 ```bash
@@ -52,7 +61,9 @@ npm run lint && npm run typecheck && npm test && npm run build   # all checks
 
 ## Project layout
 ```
-backend/            Python package (src/ontherecord), tests/
+backend/            Python package, tests, Alembic, compose.yaml (local Postgres), .env.example
+  src/ontherecord/  main.py (app factory), config.py, db.py, models/, schemas/, services/, api/
+  migrations/       Alembic migrations (versions/0001_… sequential ids)
 web/                React app (src/)
 ios/                SwiftUI app (placeholder)
 docs/               ARCHITECTURE.md (decisions), HISTORY_P<phase>.md (context log per phase), python_research.md (tooling notes)
