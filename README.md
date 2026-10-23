@@ -6,8 +6,9 @@ A personal life-management app: a **habit tracker** with a GitHub-style heatmap,
 - **F2.1 backend foundation**: a FastAPI app with settings, local Postgres in Docker, SQLAlchemy + Alembic, a `users` table, `GET /api/v1/health`, `GET /api/v1/me` (dev-only user stub), and tests against real Postgres (locally and in CI).
 - **F2.2 habits API**: habits (CRUD, archive, ordering, six design-system colours, weekday schedules), idempotent daily check/skip/uncheck, a `for_date` Today view, streak and completion stats, and a per-day heatmap. Rules: [ARCHITECTURE › Habit rules](docs/ARCHITECTURE.md#habit-rules-f22).
 - **F2.3 todos API**: nested lists (cycle-safe moves, whole-subtree delete), items (edit, move, reorder, complete/reopen, due dates, Markdown notes), and an append-only history log (guarded by a database trigger) with per-item and cursor-paginated endpoints. Rules: [ARCHITECTURE › Todo rules](docs/ARCHITECTURE.md#todo-rules-f23).
+- **F2.4 notes API**: Markdown notes (CRUD), newest first with cursor pagination, and Postgres full-text search (stemming, phrases, `or`, `-exclude`). Rules: [ARCHITECTURE › Note rules](docs/ARCHITECTURE.md#note-rules-f24).
 
-Next: F2.4 notes API. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+Next: F2.5 auth (Sign in with Apple; needs an Apple Developer account). See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.

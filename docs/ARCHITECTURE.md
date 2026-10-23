@@ -157,6 +157,12 @@ Implemented in `services/todos.py`.
 - **Pagination**: `GET /todo-events` is ordered by id. UUIDv7 ids sort by creation time, so id order is chronological and the last id is the cursor (`after`). `from`/`to` are local days in the user's timezone. Default 100 per page, max 500.
 - **Ordering**: open items by `position`; with `completed=true`, newest completed first.
 
+## Note rules (F2.4)
+Implemented in `services/notes.py`.
+- **Body** is Markdown, stored exactly as sent (no trimming; whitespace matters in Markdown). Blank bodies are rejected; max 100,000 characters.
+- **Full-text search**: `notes.search` is a generated `tsvector` column (`to_tsvector('english', body)`), so Postgres keeps it current on every insert and update, with a GIN index. `q` is parsed by `websearch_to_tsquery`: plain words (stemmed: "run" finds "running"; all must match), `"quoted phrases"`, `or`, `-excluded`. Results stay newest first, not ranked, so pagination works the same with or without `q`.
+- **Keyset pagination**: `GET /notes` orders by `(created_at, id)` descending, and the cursor encodes the last row's pair (base64 JSON, opaque to clients). The next page is `WHERE (created_at, id) < cursor`: fast on any page, and new notes never shift or repeat later pages. `id` breaks ties and works even for client-supplied ids that aren't time-ordered. Malformed cursors → 422. Default 50 per page, max 100.
+
 ## Backend layout (F2.1)
 ```
 backend/
