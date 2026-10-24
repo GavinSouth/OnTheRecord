@@ -11,7 +11,7 @@ A personal life-management app: a **habit tracker** with a GitHub-style heatmap,
 
 - **F2.6 deploy** (in progress): a production Docker image, Railway config (migrations before each deploy, health check), least-privilege database roles (`otr_owner` / `otr_app` / `otr_readonly`, set up by `uv run ontherecord-db-setup`, and used by the test suite too), separate app and migration database URLs, and a prod → local copy script. Still to do: the host steps in [docs/HOSTING.md](docs/HOSTING.md#f26-runbook), deferred until Railway publishes a postmortem of its October 2026 breach. Development continues locally.
 
-Next: Phase 3 (iOS) against the local backend; F2.6's host steps once a host is chosen. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+Next: F3.1 iOS project. The app shell design is in review ([canvas](https://claude.ai/artifact/CDNJadM5PEhXNG665ENZLX)); the Xcode build follows once it's approved and Xcode is installed. F2.6's host steps once a host is chosen. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.
