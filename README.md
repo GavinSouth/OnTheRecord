@@ -9,9 +9,9 @@ A personal life-management app: a **habit tracker** with a GitHub-style heatmap,
 - **F2.4 notes API**: Markdown notes (CRUD), newest first with cursor pagination, and Postgres full-text search (stemming, phrases, `or`, `-exclude`). Rules: [ARCHITECTURE › Note rules](docs/ARCHITECTURE.md#note-rules-f24).
 - **F2.5 auth**: Sign in with Apple (identity token verified against Apple's keys), our own 15-minute access tokens + rotating, hashed refresh tokens with reuse detection, logout, `PATCH /api/v1/me`. Every other route needs `Authorization: Bearer …`. Locally, `POST /api/v1/auth/dev` gives you tokens for the dev user (use the Authorize button in `/docs`). Rules: [ARCHITECTURE › Auth rules](docs/ARCHITECTURE.md#auth-rules-f25).
 
-- **F2.6 deploy** (in progress): a production Docker image, Railway config (migrations before each deploy, health check), least-privilege database roles (`otr_owner` / `otr_app` / `otr_readonly`, set up by `uv run ontherecord-db-setup`, and used by the test suite too), separate app and migration database URLs, and a prod → local copy script. Still to do: the Railway account steps in [docs/HOSTING.md](docs/HOSTING.md#f26-runbook).
+- **F2.6 deploy** (in progress): a production Docker image, Railway config (migrations before each deploy, health check), least-privilege database roles (`otr_owner` / `otr_app` / `otr_readonly`, set up by `uv run ontherecord-db-setup`, and used by the test suite too), separate app and migration database URLs, and a prod → local copy script. Still to do: the host steps in [docs/HOSTING.md](docs/HOSTING.md#f26-runbook), deferred until Railway publishes a postmortem of its October 2026 breach. Development continues locally.
 
-Next: finish F2.6. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
+Next: Phase 3 (iOS) against the local backend; F2.6's host steps once a host is chosen. See [ROADMAP.md](ROADMAP.md) and [docs/](docs/).
 
 ## Architecture
 - **Backend** (`backend/`): Python 3.13, FastAPI, PostgreSQL 18, SQLAlchemy 2 + Alembic. The single source of data; REST API under `/api/v1`.

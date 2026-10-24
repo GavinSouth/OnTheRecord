@@ -16,6 +16,8 @@ The code is identical in both. Only the environment variables differ.
 ## Host choice
 **Plan: Railway** (Hobby, $5/mo including $5 of usage; billed by CPU, RAM, storage and egress). API and Postgres live in one project, and pushing to GitHub deploys.
 
+> **On hold (2026-10-23):** Railway disclosed a breach on 2026-10-21. Attackers reached the store of customer environment variables, some values may have been decrypted, deploys were paused and API tokens revoked. Root cause and scope are still unpublished. Those environment variables are exactly where this plan keeps our database URLs and JWT secret. Nothing of ours was there (not deployed yet). Host choice re-opened: see HISTORY_P2. **Decision:** keep building locally and wait for Railway's postmortem before signing up. Fallback if it's unconvincing: self-host on the Mac behind Cloudflare Tunnel, or Render / Neon.
+
 Checks before committing to it (F2.6):
 - [ ] **Postgres 18** available (migration `0001` uses native `uuidv7()`). Railway has PG18 templates; mount the volume at `/var/lib/postgresql` (the PG18 layout), never reuse a PG17 volume.
 - [ ] **Automatic backups** on the Postgres volume, and a **restore actually tested**.
